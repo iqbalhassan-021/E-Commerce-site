@@ -175,6 +175,12 @@
   grid-template-columns: repeat(4,1fr);
   gap: 10px;
 }
+
+.grid-3x{
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+}
 .product-card {
   min-height: 500px;  /* Minimum height is set to 500px */
   height: auto;      /* Height will adjust to cover the content */
@@ -882,6 +888,117 @@
   margin-bottom: 0%;
 }
 
+.page-container{
+  height: auto;
+  width: 100%;
+}
+.background{
+  height: auto;
+  width: 100%;
+
+  min-height: 250px;
+  background-color: black;
+  background-image: url('/public/assets/images/stylebg.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.products-body{
+  height: auto;
+  width: 100%;
+
+  min-height: 300px;
+}
+
+.products-partition{
+  height: auto;
+  width: 100%;
+
+  display: flex;
+  flex-direction: row;
+}
+.categories-section{
+  height: auto;
+  width: 20%;
+
+  background-color: white;
+  padding: 20px;
+}
+.products-sections{
+  height: auto;
+  width: 80%;
+
+  background-color: white;
+  padding: 20px;
+}
+.categories-section li{
+  list-style: none;
+  margin-left: 20px;
+}
+.category-button{
+  height: auto;
+  width: 100%;
+  background-color: white;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 18px;
+}
+.category-button:hover{
+  color: brown;
+}
+.category-button:focus{
+  color: brown;
+}
+.filter{
+  width: 100%;
+  height: 50px;
+  padding-left: 10px;
+  display: none;
+}
+
+
+/* Media Queries */
+@media (max-width: 1200px) {
+  .grid-3x {
+    grid-template-columns: repeat(3, 1fr); /* 2 columns on medium screens */
+  }
+  .products-partition{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .categories-section{
+    width: 100%;
+  }
+  .categories-section ul{
+    display: none;
+  }
+  .products-sections{
+    width: 100%;
+  }
+  .filter{
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-3x  {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */; /* 1 column on small screens */
+  }
+
+}
+
+@media (max-width: 480px) {
+  .product-card {
+    padding: 10px;
+  }
+
+  .text-holder {
+    font-size: 14px;
+  }
+}
+
 @media only screen and (max-width: 1320px) {
   .grid{
       display: grid;
@@ -1062,6 +1179,12 @@
   }
   .image-container{
     min-height: 300px;
+  }
+  .grid-3x{
+    grid-template-columns: repeat(1,1fr);
+  }
+  .showcase{
+    padding: 0px;
   }
 }
 @media only screen and (max-width: 420px) {
