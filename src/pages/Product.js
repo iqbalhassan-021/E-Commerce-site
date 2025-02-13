@@ -157,7 +157,7 @@ const Product = () => {
           </div>
         </div>
       </div>
-      <ProductShowcase/>
+
       <Footer/>
     </>
   );

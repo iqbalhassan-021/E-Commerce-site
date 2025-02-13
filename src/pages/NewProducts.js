@@ -43,7 +43,7 @@ const NewProducts = () => {
         setProducts(productList.reverse());
   
         // Default display: Hoodies if no category is selected
-        const defaultCategory = 'Hoodie';
+        const defaultCategory = 'Oversized T-Shirt Drop Shoulder';
         const defaultFiltered = productList.filter(product => product.productType === defaultCategory);
         setFilteredProducts(defaultFiltered);
       } catch (error) {
