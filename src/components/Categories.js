@@ -35,17 +35,11 @@ const Categories = () => {
             <p>No products are added yet</p>
           ) : (
             products.map((product) => (
-                <div className="product-card">
-                  <div className="image-container" style={{backgroundColor:'white'}}>
-                    <img src={product.categoryImage} alt={product.categoryName} className="Product-image" />
-                   
-                  </div>
-                  <p style={{opacity:'0%'}}>--</p>
-                  <div className="text-holder" style={{textAlign:'center'}}>
-                    <p>{product.categoryName}</p>
-                   
-                  </div>
-                </div>
+            <div className="new-product-card" style={{backgroundImage: `url(${product.categoryImage})`}}>
+                <Link to='/products' className="no-decoration primary-button " >
+                    See More
+                </Link>
+            </div>
             ))
           )}
         </div>

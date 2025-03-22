@@ -75,8 +75,14 @@ const Navbar = () => {
 
 
     return (
+      <>
+      <div className='notification'>
+      <p>
+        New Stock Available
+      </p>
+    </div>
       <div className="wrapper">
-   
+
         <div className="navbar sticky">
           <div className="cover">
             <div className="header">
@@ -93,10 +99,8 @@ const Navbar = () => {
                 <Link to="/About" className='no-decoration navLink'>
                   <p>About</p>
                 </Link>
-                <p style={{ opacity: '0%' }}>--</p>
-                <Link to="/Blog" className='no-decoration navLink'>
-                  <p>Blog</p>
-                </Link>
+             
+
                 <p style={{ opacity: '0%' }}>--</p>
                 <Link to="/Contact" className='no-decoration navLink'>
                   <p>Contact</p>
@@ -139,10 +143,6 @@ const Navbar = () => {
                   <p>About</p>
                 </Link>
                 <p style={{ opacity: '0%' }}>--</p>
-                <Link to="/Blog" className='no-decoration navLink'>
-                  <p>Blog</p>
-                </Link>
-                <p style={{ opacity: '0%' }}>--</p>
                 <Link to="/Contact" className='no-decoration navLink'>
                   <p>Contact</p>
                 </Link>
@@ -150,6 +150,7 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+      </>
     );
   }
 

@@ -957,7 +957,72 @@
   display: none;
 }
 
+.new-product-card{
+  height: 400px;
+  width: 100%;
+  background-color: maroon;
 
+
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  display: flex;
+  justify-content: left;
+  align-items: end;
+
+  padding: 20px;
+
+  
+}
+.new-hero {
+  height: 600px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.name-div {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  height: auto;
+  width: auto;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: black;
+}
+
+/* Optional: Add these if you want to maintain the original styling */
+.signature {
+  margin: 0;
+}
+
+.name-div p {
+  margin: 10px 0 0;
+  font-size: 1.2rem;
+}
+.notification{
+  height: auto;
+  width: 100%;
+  background-color: black;
+  padding: 10px;
+  color: white;
+  text-align: center;
+}
 /* Media Queries */
 @media (max-width: 1200px) {
   .grid-3x {
@@ -981,12 +1046,18 @@
     display: flex;
   }
 }
-
-@media (max-width: 768px) {
+@media (max-width: 1110px) {
+  .name-div{
+    width: 70%;
+  }
+}
+@media (max-width: 800px) {
   .grid-3x  {
     grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */; /* 1 column on small screens */
   }
-
+  .name-div{
+    width: 90%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1185,6 +1256,9 @@
   }
   .showcase{
     padding: 0px;
+  }
+  .name-div{
+    width: 90%;
   }
 }
 @media only screen and (max-width: 420px) {
