@@ -7,6 +7,7 @@ import ProductShowcase from '../components/Products';
 import QuickBuy from '../components/QuickBuy';
 import Categories from '../components/Categories';
 import FullScreenSlider from '../components/FullScreenSlider';
+import OurDeliverAbles from '../components/OurDeliverAbles';
 
 function Home(){
     return (
@@ -19,8 +20,10 @@ function Home(){
             <ProductShowcase/>
             <Categories/>
             <FullScreenSlider/>
+            <OurDeliverAbles/>
             <QuickBuy/>
         <Footer/>
+
         </>
 
     );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 
 const HeroSlider = () => {
   const [storeName, setStoreName] = useState('');
@@ -31,34 +32,32 @@ const HeroSlider = () => {
     };
     fetchData();
   }, []);
+  const styles = {
+    hero: {
+      width: "100%",
+      height: "800px",
+      backgroundImage: "url('/assets/images/banner1.jpg')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      color: "#fff",
+      position: "relative",
+    },
 
+  };
   return (
-    <div className="new-hero" id="hero">
-      <video autoPlay muted loop>
-        <source src="/assets/images/8738467-uhd_3840_2160_25fps.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      
-      <div className="name-div">
-        <h1 className="signature">
-          {storeName ? (
-            <span style={{color:'black'}}>{storeName}</span>
-          ) : (
-            <span>The site name will be here</span>
-          )}
-        </h1>
-        <p>
-          <strong>
-            {storeSlogan ? (
-              <span>{storeSlogan}</span>
-            ) : (
-              <span>The site slogan will be here</span>
-            )}
-          </strong>
-        </p>
-  
-      </div>
+    <div style={styles.hero}>
+    <div style={styles.overlay}></div>
+    <div style={styles.content}>
+      <h1 className='signature'>{storeName}</h1>
+      <p>{storeSlogan}</p>
+      <br></br>
+      <Link to="/products" className="primary-button no-decoration">Shop Now</Link>
     </div>
+  </div>
   );
 };
 

@@ -10,6 +10,7 @@
 .sticky{
   position: sticky;
   top: 0;
+  z-index: 100;
 }
 .wrapper{
   height: auto;
@@ -21,7 +22,7 @@
   background-color: white;
   text-align: center;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.034);
-  z-index: 9;
+  z-index: 190;
 }
 .cover{
   height: auto;
@@ -367,6 +368,11 @@
 .footer{
   height: auto;
   width: 100%;
+  background-color: black;
+  color: white;
+}
+.footer a{
+  color: white;
 }
 .white-button{
   background-color: white;
