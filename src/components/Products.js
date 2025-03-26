@@ -4,26 +4,54 @@ import { Link } from 'react-router-dom';
 
 const ProductShowcase = () => {
   const [products, setProducts] = useState([]);
+  const [selectedProductType, setSelectedProductType] = useState(''); // State for mainDisplay selection
 
+  // Fetch the selected productType from mainDisplay
+  useEffect(() => {
+    const fetchMainDisplay = async () => {
+      const db = getFirestore();
+      const mainDisplayCollection = collection(db, 'mainDisplay');
+      try {
+        const querySnapshot = await getDocs(mainDisplayCollection);
+        if (!querySnapshot.empty) {
+          const data = querySnapshot.docs[0].data(); // Assuming one doc (e.g., 'settings')
+          setSelectedProductType(data.selectedProductType || 'Oversized T-Shirt Drop Shoulder'); // Fallback
+        } else {
+          setSelectedProductType('Oversized T-Shirt Drop Shoulder'); // Default if no selection
+        }
+      } catch (error) {
+        console.error("Error retrieving main display data: ", error);
+        setSelectedProductType('Oversized T-Shirt Drop Shoulder'); // Fallback on error
+      }
+    };
+    fetchMainDisplay();
+  }, []);
+
+  // Fetch and filter products based on selectedProductType
   useEffect(() => {
     const fetchData = async () => {
+      if (!selectedProductType) return; // Wait until selectedProductType is set
       const db = getFirestore();
       const dataCollection = collection(db, 'products');
       try {
         const querySnapshot = await getDocs(dataCollection);
-        const productList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        const productList = querySnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          // Filter by the selected productType
+          .filter(product => product.productType === selectedProductType)
+          // Sort by productCode in descending order
+          .sort((a, b) => b.productCode.localeCompare(a.productCode));
         setProducts(productList);
       } catch (error) {
         console.error("Error retrieving product data: ", error);
       }
     };
     fetchData();
-  }, []);
+  }, [selectedProductType]); // Re-run when selectedProductType changes
 
-  // Slice the products array to show only the first 8 products
   const displayedProducts = products.slice(0, 8);
 
   return (
@@ -31,7 +59,7 @@ const ProductShowcase = () => {
       <div className="cover">
         <div className="showcase grid">
           {displayedProducts.length === 0 ? (
-            <p>No products are added yet</p>
+            <p>No "{selectedProductType}" products found</p>
           ) : (
             displayedProducts.map((product) => (
               <Link key={product.id} to={`/product/${product.id}`} className='no-decoration'>

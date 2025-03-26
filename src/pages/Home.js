@@ -6,6 +6,7 @@ import HeroSlider from '../components/heroSlider';
 import ProductShowcase from '../components/Products';
 import QuickBuy from '../components/QuickBuy';
 import Categories from '../components/Categories';
+import FullScreenSlider from '../components/FullScreenSlider';
 
 function Home(){
     return (
@@ -17,6 +18,7 @@ function Home(){
             <HeroSlider/>
             <ProductShowcase/>
             <Categories/>
+            <FullScreenSlider/>
             <QuickBuy/>
         <Footer/>
         </>
