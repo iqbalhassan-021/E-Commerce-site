@@ -8,7 +8,7 @@ const NewProducts = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('Hoodie'); // Default category
+  const [selectedCategory, setSelectedCategory] = useState('Hoodie');
 
   // Fetch categories
   useEffect(() => {
@@ -39,12 +39,15 @@ const NewProducts = () => {
           ...doc.data(),
         }));
         
-        // Reverse the products array to show the newest at the top
-        setProducts(productList.reverse());
+        // Reverse the products array to show newest first
+        const reversedProducts = productList.reverse();
+        setProducts(reversedProducts);
   
         // Default display: Hoodies if no category is selected
         const defaultCategory = 'Oversized T-Shirt Drop Shoulder';
-        const defaultFiltered = productList.filter(product => product.productType === defaultCategory);
+        const defaultFiltered = sortProductsByCode(
+          reversedProducts.filter(product => product.productType === defaultCategory)
+        );
         setFilteredProducts(defaultFiltered);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -53,11 +56,23 @@ const NewProducts = () => {
   
     fetchProducts();
   }, []);
-  
+
+  // Function to extract number from productCode and sort
+  const sortProductsByCode = (productsArray) => {
+    return productsArray.sort((a, b) => {
+      // Extract numbers from productCode (e.g., "SH01" -> "01")
+      const numA = parseInt(a.productCode.replace(/[^0-9]/g, ''), 10);
+      const numB = parseInt(b.productCode.replace(/[^0-9]/g, ''), 10);
+      // Sort in descending order
+      return numB - numA;
+    });
+  };
 
   // Filter products by category
   const handleCategoryClick = (categoryName) => {
-    const filtered = products.filter(product => product.productType === categoryName);
+    const filtered = sortProductsByCode(
+      products.filter(product => product.productType === categoryName)
+    );
     setFilteredProducts(filtered);
   };
 
@@ -65,7 +80,9 @@ const NewProducts = () => {
   const handleSelectChange = (event) => {
     const categoryName = event.target.value;
     setSelectedCategory(categoryName);
-    const filtered = products.filter(product => product.productType === categoryName);
+    const filtered = sortProductsByCode(
+      products.filter(product => product.productType === categoryName)
+    );
     setFilteredProducts(filtered);
   };
 
@@ -81,7 +98,6 @@ const NewProducts = () => {
         <div className="background"></div>
         <div className="products-body">
           <div className="cover">
-
             <div className="products-partition">
               <div className="categories-section">
                 <h2>Categories</h2>

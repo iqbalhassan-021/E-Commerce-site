@@ -36,7 +36,7 @@ const OurDeliverAbles = () => {
       padding: "20px",
       display: "flex",
       flexDirection: "column",
-      justifyContent: "center",
+
       minHeight:isMobile ? "auto" : "800px",
     },
     title: {
