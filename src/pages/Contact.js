@@ -11,7 +11,7 @@ const ContactPage = () => {
     <div className="contactus">
       <div className="cover">
         <div className="contact-section">
-          <div className="contact">
+          <div className="contact"  action="https://api.web3forms.com/submit" method="POST" >
             <form action="https://api.web3forms.com/submit" method="POST"  className="contact-form">
             <input type="hidden" name="access_key" value="96dfec8b-2442-41ef-b291-a01b5f495183"/>
               <label htmlFor="name">First Name</label>
