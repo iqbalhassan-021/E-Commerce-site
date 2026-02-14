@@ -37,20 +37,33 @@ const ProductShowcase = () => {
               <p>No products are added yet</p>
             ) : (
               products.map((product) => (
-                <Link key={product.id} to={`/product/${product.id}`} className='no-decoration'>
-                  <div className="product-card">
-                    <div className="image-container">
-                      <img src={product.productImage} alt={product.productName} className="Product-image" />
-                    </div>
-                    <div className="text-holder">
-                      <p>{product.productName}</p>
-                      <p>Type: {product.productType}</p>
-                      <p>Code: {product.productCode}</p>
-                      <p className="price-tag">From RS.{product.productPrice}</p>
-
-                    </div>
-                  </div>
-                </Link>
+                         <Link to={`/product/${product.id}`} className="no-decoration" key={product.id}>
+                               <div className="product-card">
+                                 <div
+                                   className="product-img-container"
+                                   style={{ backgroundImage: `url(${product.productImage})` }}
+                                 >
+                                   <div className="product-buttons">
+                                     <button className="product-button">
+                                       <i className="fa-regular fa-heart"></i>
+                                       <p>-</p>
+                                       <p>00</p>
+                                     </button>
+                                     <button className="product-button">
+                                       <i className="fa-regular fas fa-cart-plus"></i>
+                                     </button>
+                                   </div>
+                                 </div>
+                                 <div className="product-text-holder">
+                                   <div className="product-name">
+                                     <p className="product-name-text">{product.productName}</p>
+                                   </div>
+                                   <div className="product-price">
+                                     <p className="product-price-text">Rs.{product.productPrice}</p>
+                                   </div>
+                                 </div>
+                               </div>
+                             </Link>
               ))
             )}
           </div>

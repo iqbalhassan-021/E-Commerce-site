@@ -1,0 +1,149 @@
+
+.order-wrapper {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.order-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  background: #fff;
+  padding: 0 40px;
+  border-right: 2px solid #eee;
+}
+
+.order-section-price {
+  display: flex;
+  justify-content: space-between;
+  /* background: #f2f2f2; */
+  width: 100%;
+  padding: 20px;
+  border-bottom: 1px solid #666;
+}
+
+.order-section-orderno {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.order-section-orderno i {
+  font-size: 60px;
+  color: #28a745;
+}
+
+.order-section-orderno p {
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.order-section-orderno h1 {
+  font-weight: 200;
+  font-size: 24px;
+  margin: 5px 0 0;
+}
+
+.order-section-map {
+  text-align: justify;
+}
+
+.order-section-map iframe {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.order-section-map h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.order-section-map p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 40px;
+}
+.order-right {
+  flex: 1;
+  padding-left: 40px;
+}
+
+.order-details h3 {
+  font-size: 18px;
+  margin: 20px 0;
+}
+
+.order-details h4 {
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 12px;
+  margin-top: 20px;
+}
+
+.order-details p {
+  color: #666;
+  font-weight: 200;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.shopping {
+  display: flex;
+  padding: 20px 28px;
+  background: black;
+  color: white;
+  margin: 30px auto;
+  border: 1px solid black;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.shopping:hover {
+  background: white;
+  color: black;
+}
+
+.order-right a {
+  text-decoration: none;
+}
+
+@media (max-width: 576px) {
+  .order-wrapper {
+    flex-direction: column;
+    /* padding: 20px; */
+  }
+
+  .order-left {
+    border-right: none;
+    padding-right: 0;
+    padding-left: 0;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 30px;
+  }
+
+  .order-section-price {
+    width: 90%;
+  }
+
+  .order-section-orderno {
+    padding-left: 10px;
+  }
+
+  .order-section-map h3 {
+    padding-left: 10px;
+  }
+
+  .order-section-map p {
+    padding-left: 10px;
+  }
+
+  .order-right {
+    padding-left: 10px;
+    padding-right: 20px;
+  }
+}

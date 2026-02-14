@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Navigate , useNavigate } from 'react-router-dom';
 import Navbar from '../components/navBar';
 import Footer from '../components/footer';
+import BottomBar from '../components/BottomBar';
 
 const AboutPage = () => {
   const [siteName, setSiteName] = useState('');
@@ -62,6 +63,7 @@ const AboutPage = () => {
         </div>
       </div>
     </div>
+    <BottomBar/>
     <Footer/>
     </>
   );

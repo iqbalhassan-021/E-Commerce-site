@@ -1,262 +1,431 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Navbar from '../components/navBar';
 import Footer from '../components/footer';
-import ProductShowcase from '../components/Products';
+import AllProducts from '../components/AllProducts';
+import BottomBar from '../components/BottomBar';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import CategorySlider from '../components/CategorySlider';
 
 const Product = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [instaID, setInstaID] = useState('');
   const [currency, setcurrency] = useState('');
+  const [whsappID, setwhsappID] = useState('');
   const [shippingrate, setshippingrate] = useState('');
-  
   const [products, setProducts] = useState([]);
+  const [salePrice, setSalePrice] = useState(null);
+  const [mainImage, setMainImage] = useState('');
+const [selectedSize, setSelectedSize] = useState(null);
+const [quantity, setQuantity] = useState(1);
+
+  const [showDetails, setShowDetails] = useState({
+    type: false,
+    code: false,
+    desc: false,
+    shipping: false,
+    color: false,
+    size: false,
+  });
+
+  const toggleSection = (key) => {
+    setShowDetails((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProductData = async () => {
       const db = getFirestore();
-      const dataCollection = collection(db, 'products');
       try {
-        const querySnapshot = await getDocs(dataCollection);
-        const productList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setProducts(productList);
-      } catch (error) {
-        console.error("Error retrieving product data: ", error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const db = getFirestore();
-      const dataCollection = collection(db, 'storeDetails');
-      try {
-        const querySnapshot = await getDocs(dataCollection);
-        if (!querySnapshot.empty) {
-          const firstDocument = querySnapshot.docs[0];
-          const siteInfo = firstDocument.data();
-          const instaID = siteInfo.instaID;
-          const currency = siteInfo.currency;
-          const shippingrate = siteInfo.shippingrate;
-          setInstaID(instaID);
-          setcurrency(currency);
-          setshippingrate(shippingrate);
-        } else {
-          console.log('No documents found!');
-        }
-      } catch (error) {
-        console.error("Error retrieving site data: ", error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchProduct = async () => {
-      const db = getFirestore();
-      const docRef = doc(db, 'products', id);
-      try {
+        const docRef = doc(db, 'products', id);
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          console.log("Product data:", docSnap.data());
-          setProduct(docSnap.data());
+
+        if (!docSnap.exists()) {
+          console.error("❌ Product not found");
+          return;
+        }
+
+        const prodData = docSnap.data();
+        setProduct(prodData);
+
+        // set default main image
+        setMainImage(prodData.productImage);
+
+        const onSaleSnap = await getDocs(collection(db, 'onSale'));
+        const onSaleMatch = onSaleSnap.docs.find(
+          (doc) => doc.data().productCode === prodData.productCode
+        );
+        if (onSaleMatch) {
+          setSalePrice(onSaleMatch.data().salePrice);
         } else {
-          console.error("No such document!");
+          const storeSaleSnap = await getDocs(collection(db, 'storeSale'));
+          storeSaleSnap.forEach((saleDoc) => {
+            const saleData = saleDoc.data();
+            if (
+              saleData.categoryId === prodData.productType ||
+              saleData.categoryId === prodData.categoryId
+            ) {
+              const discount =
+                (prodData.productPrice * saleData.salePercentage) / 100;
+              const discountedPrice = prodData.productPrice - discount;
+              setSalePrice(discountedPrice.toFixed(2));
+            }
+          });
         }
       } catch (error) {
-        console.error("Error retrieving product data: ", error);
+        console.error("❌ Error loading product data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProduct();
+
+    fetchProductData();
   }, [id]);
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  useEffect(() => {
+    const fetchProductsList = async () => {
+      const db = getFirestore();
+      try {
+        const dataCollection = collection(db, 'products');
+        const querySnapshot = await getDocs(dataCollection);
+        const productList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProducts(productList);
+      } catch (error) {
+        console.error("❌ Error retrieving product list:", error);
+      }
+    };
+    fetchProductsList();
+  }, []);
 
-  if (!product) {
-    return <p>No product found</p>;
+  useEffect(() => {
+    const fetchSiteInfo = async () => {
+      const db = getFirestore();
+      try {
+        const siteSnap = await getDocs(collection(db, 'storeDetails'));
+        if (!siteSnap.empty) {
+          const siteData = siteSnap.docs[0].data();
+          setInstaID(siteData.instaID);
+          setwhsappID(siteData.phone);
+          setcurrency(siteData.currency);
+          setshippingrate(siteData.shippingrate);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching site info:", error);
+      }
+    };
+    fetchSiteInfo();
+  }, []);
+
+const addToCart = (product) => {
+  try {
+
+    if (!selectedSize) {
+      toast.error("Please select a size", { position: "bottom-right" });
+      return;
+    }
+
+    const existingCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const actualPrice = salePrice || product.productPrice;
+
+    // 🔥 Check SAME product AND SAME size
+    const existingProduct = existingCart.find(
+      (item) =>
+        item.id === product.id &&
+        item.productSize === selectedSize
+    );
+
+    let updatedCart;
+
+    if (existingProduct) {
+
+      updatedCart = existingCart.map(item =>
+        item.id === product.id && item.productSize === selectedSize
+          ? { ...item, quantity: item.quantity + quantity }
+          : item
+      );
+
+    } else {
+
+      updatedCart = [
+        ...existingCart,
+        {
+          id: product.id,
+          productName: product.productName,
+          productPrice: actualPrice,
+          productImage: product.productImage,
+          productSize: selectedSize,
+          productColor: product.productColor || "Not Specified",
+          productCode: product.productCode,
+          productType: product.productType,
+          quantity: quantity,
+        },
+      ];
+    }
+
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    window.dispatchEvent(new Event('toggle-cart'));
+
+    toast.success("Added to cart!", { position: "bottom-right" });
+
+  } catch (error) {
+
+    console.error("❌ Error adding to cart:", error);
+    toast.error("Failed to add to cart.", { position: "bottom-right" });
+
   }
+};
+
+
+  if (loading) return <p>Loading...</p>;
+  if (!product) return <p>No product found</p>;
+
+  const images = [
+    product.productImage,
+    product.productImage1,
+    product.productImage2,
+    product.productImage3,
+  ].filter(Boolean);
 
   return (
     <>
-           <div className='sticky'>
-            <Navbar/>
-        </div>
+   
+        <Navbar />
+    
+
       <div className="quick-buy">
         <div className="cover">
           <div className="container">
             <div className="the-product">
-              <img src={product.productImage} alt={product.productName} />
+              {images.length > 0 && (
+                <>
+                  <div className="main-image">
+                    <img
+                      src={mainImage}
+                      alt="Main product"
+                      style={{ width: "100%", maxHeight: "400px", objectFit: "contain" }}
+                    />
+                  </div>
+<div className="thumbnail-row" style={{ marginTop: "10px" }}>
+  {images
+    ?.filter(img => img && img.trim() !== "")
+    .map((img, idx) => (
+      <img
+        key={idx}
+        src={img}
+        alt={`thumb-${idx}`}
+        onClick={() => setMainImage(img)}
+        onError={(e) => {
+          e.target.style.display = "none";
+        }}
+        style={{
+          width: "60px",
+          height: "60px",
+          margin: "5px",
+          cursor: "pointer",
+          border: mainImage === img ? "2px solid black" : "1px solid #ccc",
+          objectFit: "cover",
+        }}
+      />
+    ))}
+</div>
+
+                </>
+              )}
             </div>
+
             <div className="the-details">
-         
               <p className="title">{product.productName}</p>
               <br />
-              <p>Shirt Type: {product.productType}</p>
-              <p>Code: {product.productCode}</p>
-              <p>From RS.{product.productPrice}</p>
-              <p>Shipping fee : {currency}{shippingrate}</p>
+              <p className="price">
+                {salePrice ? (
+                  <>
+                    <span className="original-price">
+                      From {currency}
+                      {product.productPrice}
+                    </span>
+                    <span className="sale-price">
+                      {" "}
+                      {currency}
+                      {salePrice}
+                    </span>
+                  </>
+                ) : (
+                  <>From {currency}{product.productPrice}</>
+                )}
+              </p>
+              <br />
 
-              {/* Added Size and Color Display */}
-              <style>
-                {`
-                  .size-container, .color-container {
-                    margin: 16px 0;
-                  }
-                  .size-container h4, .color-container h4 {
-                    font-size: 16px;
-                    font-weight: 600;
-                    margin-bottom: 8px;
-                    color: #000000;
-                  }
-                  .size-list {
-                    display: flex;
-                    gap: 8px;
-                    flex-wrap: wrap;
-                  }
-                  .size-item {
-                    padding: 8px 16px;
-                    border: 1px solid #d1d1d1;
-                    border-radius: 4px;
-                    background-color: #ffffff;
-                    font-size: 14px;
-                    color: #333333;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                  }
-                  .size-item:hover {
-                    border-color: #000000;
-                    background-color: #f0f0f0;
-                  }
-                  .color-list {
-                    display: flex;
-                    gap: 12px;
-                    flex-wrap: wrap;
-                  }
-                  .color-swatch {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    border: 1px solid #d1d1d1;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                  }
-                  .color-swatch:hover {
-                    border-color: #000000;
-                    transform: scale(1.1);
-                  }
-                  .color-swatch.white {
-                    border: 1px solid #d1d1d1;
-                  }
-                `}
-              </style>
-              {
-                (() => {
-                  const manualProductData = [
-                    { categoryName: "Sweat Shirt", size: "XL,L,S,M", colors: "Black,Charcoal Grey,Light Pink,White,Red,Gray" },
-                    { categoryName: "Tanktop", size: "XL,L,S,M", colors: "Black,Yellow,Grey,White,Red,Gray,Navy" },
-                    { categoryName: "Hoodie", size: "XL,L,S,M", colors: "Black,Yellow,Grey,White,Red,Gray,Navy,Pink,Purple" },
-                    { categoryName: "Steel Water Bottle", size: "-", colors: "White" },
-                    { categoryName: "Long Sleeves Shirt", size: "XL,L,S,M", colors: "Black,Yellow,Grey,White,Red,Gray,Navy,Pink,Purple" },
-                    { categoryName: "Wallet", size: "-", colors: "Black,Green,Leather" },
-                    { categoryName: "Zipper", size: "XL,L,S,M", colors: "Black,Yellow,Grey,White,Red,Gray,Navy,Pink,Purple" },
-                    { categoryName: "Cap", size: "XL,L,S,M", colors: "Black,Yellow,Grey,White,Red,Gray,Navy,Pink,Purple" },
-                    { categoryName: "T-Shirt", size: "XL,L,S,M", colors: "Black,Yellow,Grey,White,Red,Gray,Navy,Pink,Purple" },
-                    { categoryName: "Oversized T-Shirt Drop Shoulder", size: "XL,L,S,M", colors: "Black,Yellow,Grey,White,Red,Gray,Navy,Pink,Purple" },
-                    { categoryName: "Polo", size: "XL,L,S,M", colors: "Black,Yellow,Grey,White,Red,Gray,Navy,Pink,Purple" },
-                    { categoryName: "Shopping Bag", size: "-", colors: "-" },
-                    { categoryName: "Photo Frames", size: "A4", colors: "-" },
-                    { categoryName: "Mug", size: "-", colors: "-" }
-                  ];
-                  const matchedProduct = manualProductData.find(p => p.categoryName === product.productType);
-                  const getSizes = (sizeString) => sizeString && sizeString !== '-' ? sizeString.split(',').map(s => s.trim()) : [];
-                  const getColors = (colorString) => colorString && colorString !== '-' ? colorString.split(',').map(c => c.trim()) : [];
-                  const colorMap = {
-                    Black: '#000000',
-                    'Charcoal Grey': '#36454F',
-                    'Light Pink': '#FFB6C1',
-                    White: '#FFFFFF',
-                    Red: '#FF0000',
-                    Gray: '#808080',
-                    Yellow: '#FFFF00',
-                    Navy: '#000080',
-                    Pink: '#FF69B4',
-                    Purple: '#800080',
-                    Green: '#008000',
-                    Leather: '#8B4513'
-                  };
+              {/* Details sections (color, size, etc.) */}
+              <div className="shopify-box" onClick={() => toggleSection("color")}>
+                <div className="shopify-box-inner">
+                  <i className="fas fa-palette shopify-icon"></i>
+                  <div className="shopify-text">
+                    <span className="shopify-label">Color</span>
+                    {showDetails.color && (
+                      <p className="shopify-value">
+                        {product.productColor || "Not Specified yet"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-                  return (
-                    <>
-                      {matchedProduct && getSizes(matchedProduct.size).length > 0 && (
-                        <div className="size-container" style={{display: 'flex', flexDirection: 'column'}}>
-                          <h4>Available Sizes</h4>
-                         
-                          <div className="size-list">
-                            {getSizes(matchedProduct.size).map((size, index) => (
-                              <div key={index} className="size-item">{size}</div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {matchedProduct && getColors(matchedProduct.colors).length > 0 && (
-                        <div className="color-container">
-                          <h4>Available Colors</h4>
-                          <div className="color-list">
-                            {getColors(matchedProduct.colors).map((color, index) => (
-                              <div
-                                key={index}
-                                className={`color-swatch ${color.toLowerCase()}`}
-                                style={{ backgroundColor: colorMap[color] || '#000000' }}
-                                title={color}
-                              ></div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()
-              }
+           <div className="shopify-box">
+  <div className="shopify-box-inner">
+    <i className="fas fa-expand shopify-icon"></i>
 
-              {instaID ? (
-                <a href={instaID} className="no-decoration navLink" target='blank'>
-                  <button className="primary-button white-button">Let's talk about this product</button>
-                </a>
-              ) : (
-                <a href="#" className="no-decoration navLink" target='blank'>
-                  <button className="primary-button white-button">Let's talk about this product</button>
-                </a>
-              )}
-                    
-            {products
-  .filter((pay) => pay.productCode === product.productCode)
-  .map((pay) => (
-    <Link key={pay.id} to={`/Buy/${pay.id}`} className='no-decoration'>
-      <button className="primary-button">Buy Now</button>
-    </Link>
-  ))
-}
+    <div className="shopify-text">
+      <span className="shopify-label">Size</span>
+      <br />
 
-                 
+      <div style={{ display:'flex', gap:'10px' }}>
+        {["S","M","L","XL"].map(size => (
 
-    
+          <button
+            key={size}
+            onClick={() => setSelectedSize(size)}
+            style={{
+              padding:'10px 16px',
+              border: selectedSize === size
+                ? '2px solid black'
+                : '1px solid #ccc',
+              backgroundColor: selectedSize === size
+                ? 'black'
+                : 'white',
+              color: selectedSize === size
+                ? 'white'
+                : 'black',
+              cursor:'pointer',
+              fontWeight:'600'
+            }}
+          >
+            {size}
+          </button>
+
+        ))}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+             <div className="shopify-box">
+  <div className="shopify-box-inner">
+    <i className="fa-solid fa-boxes-stacked shopify-icon"></i>
+
+    <div className="shopify-text">
+      <span className="shopify-label">Quantity</span>
+      <br/>
+
+      <div style={{
+        display:'flex',
+        alignItems:'center',
+        border:'1px solid black',
+        width:'fit-content'
+      }}>
+
+        <button
+          onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+          style={{
+            background:'white',
+            border:'none',
+            fontSize:'28px',
+            padding:'5px 15px',
+            cursor:'pointer',
+            color:'black'
+          }}
+        >
+          -
+        </button>
+
+        <span style={{ padding:'0 15px', fontWeight:'700' }}>
+          {quantity}
+        </span>
+
+        <button
+          onClick={() => setQuantity(prev => prev + 1)}
+          style={{
+            background:'white',
+            border:'none',
+            fontSize:'22px',
+            padding:'5px 15px',
+            cursor:'pointer',
+            color:'black'
+          }}
+        >
+          +
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+              <div className="shopify-box" onClick={() => toggleSection("desc")}>
+                <div className="shopify-box-inner">
+                  <i className="fas fa-align-left shopify-icon"></i>
+                  <div className="shopify-text">
+                    <span className="shopify-label">Description</span>
+                    {showDetails.desc && (
+                      <p className="shopify-value">
+                        {product.productDescription ||
+                          "No description available"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className="shopify-box"
+                onClick={() => toggleSection("shipping")}
+              >
+                <div className="shopify-box-inner">
+                  <i className="fas fa-truck shopify-icon"></i>
+                  <div className="shopify-text">
+                    <span className="shopify-label">Shipping</span>
+                    {showDetails.shipping && (
+                      <p className="shopify-value">
+                        Average Shipping Rate {currency}
+                        {shippingrate}, may change based on location.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {products
+                .filter((pay) => pay.productCode === product.productCode)
+                .map((pay) => (
+                  <button
+                    className="primary-button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      addToCart(product);
+                    }}
+                  >
+                    <p>Add to Cart</p>
+                    <i className="fas fa-shopping-cart"></i>
+                  </button>
+                ))}
             </div>
           </div>
         </div>
       </div>
+      
+      <CategorySlider
+        category={product.productType}
+      />
 
-      <Footer/>
+      <BottomBar />
+      <Footer />
     </>
   );
 };
